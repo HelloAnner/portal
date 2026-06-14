@@ -108,12 +108,18 @@ PORTAL_ISSUER=https://portal.example.com
 | 功能域 | 说明 | 详细文档 |
 | --- | --- | --- |
 | 登录与认证 | 门户在托管模式下统一处理用户登录、认证、会话与进入子系统前的身份确认 | [authentication](./authentication/README.md) |
+| 门户首页 | 聚合当前用户在当前租户下可见、可进入、维护中的系统入口 | [portal-home](./portal-home/README.md) |
+| 我的资料与我的权限 | 用户维护自己的展示资料，并查看最终权限、权限来源和下发上下文预览 | [profile-permissions](./profile-permissions/README.md) |
+| 管理后台概览 | 展示用户、系统、接入、跳转、风险权限变更和近期审计的聚合状态 | [admin-overview](./admin-overview/README.md) |
 | 用户与角色管理 | 管理企业用户、门户角色、用户身份和子系统管理员关系 | [user-role-management](./user-role-management/README.md) |
+| 租户管理 | 管理租户、租户成员、租户可用系统和租户范围内管理员 | [tenant-management](./tenant-management/README.md) |
+| 角色管理 | 管理门户角色、角色成员、角色默认权限和子系统身份默认值 | [role-management](./role-management/README.md) |
 | 权限配置 | 配置用户可见系统、可访问系统、子系统管理员权限和模块权限 | [permission-configuration](./permission-configuration/README.md) |
 | 子系统接入 | 定义 Northline、DocuMind 等系统如何接入门户并消费身份上下文 | [subsystem-integration](./subsystem-integration/README.md) |
 | 系统目录 | 管理门户中展示的子系统入口、系统元数据、跳转地址和启用状态 | [system-catalog](./system-catalog/README.md) |
 | 子管理员管理 | 在门户中为不同子系统配置管理员身份和管理范围 | [sub-admin](./sub-admin/README.md) |
 | 安全与审计 | 记录登录、授权、权限变更、子系统跳转等关键行为 | [security-audit](./security-audit/README.md) |
+| 无权限处理 | 统一处理无登录、无权限、系统停用、租户停用和凭证无效的恢复路径 | [no-permission](./no-permission/README.md) |
 
 ## 6. 门户完整功能描述
 

@@ -1,0 +1,10 @@
+[package]
+name = "web_embed"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+axum = { workspace = true }
+mime_guess = { workspace = true }
+percent-encoding = "2"
+rust-embed = { workspace = true }

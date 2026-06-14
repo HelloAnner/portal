@@ -31,13 +31,16 @@
 3. 构建 Rust 后端：`cargo build --release --bin portal-api`
 4. 初始化数据：`pnpm db:seed`（对应 `cargo run --bin portal-seed`）
 5. 启动 Rust API：`pnpm dev:api`（默认端口 8080）
+<<<<<<< HEAD
 6. 启动前端开发服务器：`pnpm dev`（默认端口 3000，通过 `NEXT_PUBLIC_API_URL` 调用 Rust 后端）
+||||||| parent of ec7dff3 (feat: 将后端从 Next.js 迁移至 Rust (Axum + SQLx))
+3. 同步数据库：`pnpm db:migrate`
+4. 初始化数据：`pnpm db:seed`
+5. 启动服务：`pnpm dev`（默认端口 8080）
+6. 默认管理员账号：`admin` / `admin123`
+=======
+6. 启动前端开发服务器：`pnpm dev`（默认端口 3000，通过 `next.config.ts` 代理 `/api/*` 到 Rust 后端）
+>>>>>>> ec7dff3 (feat: 将后端从 Next.js 迁移至 Rust (Axum + SQLx))
 7. 默认管理员账号：`admin` / `admin123`
 
 生产部署时，先构建前端静态产物（`apps/web/out`），再由 `portal-api` 二进制直接托管静态资源并提供 API。
-
-<!-- BEGIN:nextjs-agent-rules -->
-# This is NOT the Next.js you know
-
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
-<!-- END:nextjs-agent-rules -->

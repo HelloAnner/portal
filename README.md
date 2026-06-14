@@ -1,36 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 企业门户系统
 
-## Getting Started
+企业内部各类业务系统的统一入口，同时承担统一身份、租户、角色、权限和子系统接入配置的控制面职责。
 
-First, run the development server:
+后端采用 Rust（Axum + SQLx）实现，作为唯一可信控制面；前端为 Next.js 应用，仅消费后端 API。
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## 主要功能
+
+- 统一登录与认证
+- 门户首页（系统入口聚合、租户切换）
+- 我的资料与我的权限
+- 管理后台：概览、用户管理、租户管理、角色管理、系统目录、权限配置、子系统管理员、子系统接入、安全审计
+- 子系统一次性授权码跳转
+
+## 技术栈
+
+- **后端**：Rust + Axum + Tokio + SQLx + PostgreSQL
+- **前端**：Next.js 16 App Router + TypeScript
+- **样式**：Tailwind CSS 4
+- **部署**：Rust 服务直接托管前端静态产物，单环境单 `.env` 部署
+
+## 项目结构
+
+```text
+apps/api-rs/        # Rust 后端服务
+apps/web/           # Next.js 前端工程
+crates/web_embed/   # 将前端静态产物内嵌到 Rust 二进制
+docs/               # 产品、设计、技术和功能域文档
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 快速开始
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+# 启动 PostgreSQL
+docker run -d --name portal-postgres -e POSTGRES_USER=portal -e POSTGRES_PASSWORD=portal -e POSTGRES_DB=portal -p 5432:5432 postgres:16-alpine
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# 安装依赖
+pnpm install
 
-## Learn More
+# 构建 Rust 后端
+cargo build --release --bin portal-api
 
-To learn more about Next.js, take a look at the following resources:
+# 初始化数据
+pnpm db:seed
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# 方式一：分别启动后端和前端（开发）
+pnpm dev:api      # Rust 后端，默认 http://localhost:8080
+pnpm dev          # Next.js 前端，默认 http://localhost:3000
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# 方式二：直接运行生产二进制（前端静态产物需先构建）
+cd apps/web && pnpm build
+./target/release/portal-api
+```
 
-## Deploy on Vercel
+默认管理员账号 `admin` / `admin123`。
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+生产部署时，将 `apps/web/out` 构建产物与 `target/release/portal-api` 二进制发布到同一环境，配置同一份 `.env` 后启动即可。
