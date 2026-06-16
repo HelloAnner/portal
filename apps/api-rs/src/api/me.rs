@@ -22,7 +22,7 @@ use crate::state::AppState;
 pub fn router() -> Router<AppState> {
     Router::new()
         .route("/api/me/permissions", get(permissions))
-        .route("/api/me/permissions/{system_code}", get(permission_detail))
+        .route("/api/me/permissions/:system_code", get(permission_detail))
         .route("/api/access-denied/context", get(access_denied_context))
 }
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,10 @@ import { fetchApi, isAuthError } from "@/lib/api-client";
 
 interface LoginResponse {
   redirectTo: string;
+}
+
+interface SetupStatus {
+  needsSetup: boolean;
 }
 
 export function LoginForm() {
@@ -18,6 +22,16 @@ export function LoginForm() {
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    fetchApi<SetupStatus>("/api/setup/status")
+      .then((status) => {
+        if (status.needsSetup) {
+          router.replace("/setup");
+        }
+      })
+      .catch(() => {});
+  }, [router]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

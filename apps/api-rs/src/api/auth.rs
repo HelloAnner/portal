@@ -185,21 +185,48 @@ async fn exchange_ticket(
 
     let row = row.ok_or(AppError::InvalidSubsystemTicket)?;
     let hash: String = row.get("code_hash");
+    let user_id: Uuid = row.get("user_id");
+    let tenant_id: Option<Uuid> = row.get("tenant_id");
+    let system_id: Uuid = row.get("system_id");
     let expires_at: chrono::DateTime<Utc> = row.get("expires_at");
     let consumed_at: Option<chrono::DateTime<Utc>> = row.get("consumed_at");
     let system_code: String = row.get("system_code");
 
     if consumed_at.is_some() || expires_at < Utc::now() {
+        audit_ticket_exchange_failure(
+            &state,
+            Some(user_id),
+            tenant_id,
+            Some(system_id),
+            "expired_or_consumed",
+        )
+        .await;
         return Err(AppError::InvalidSubsystemTicket);
     }
 
     if system_code != req.system_code {
+        audit_ticket_exchange_failure(
+            &state,
+            Some(user_id),
+            tenant_id,
+            Some(system_id),
+            "system_code_mismatch",
+        )
+        .await;
         return Err(AppError::InvalidSubsystemTicket);
     }
 
     let valid = verify(secret, &hash)
         .map_err(|_| AppError::Internal(anyhow::anyhow!("ticket verify error")))?;
     if !valid {
+        audit_ticket_exchange_failure(
+            &state,
+            Some(user_id),
+            tenant_id,
+            Some(system_id),
+            "secret_mismatch",
+        )
+        .await;
         return Err(AppError::InvalidSubsystemTicket);
     }
 
@@ -211,4 +238,32 @@ async fn exchange_ticket(
 
     let snapshot: Value = row.get("context_snapshot");
     Ok(Json(snapshot))
+}
+
+async fn audit_ticket_exchange_failure(
+    state: &AppState,
+    actor_user_id: Option<Uuid>,
+    tenant_id: Option<Uuid>,
+    system_id: Option<Uuid>,
+    reason: &str,
+) {
+    let _ = write_audit(
+        &state.db,
+        AuditPayload {
+            request_id: None,
+            actor_user_id,
+            action: "subsystem.ticket.exchange.failure".to_string(),
+            target_type: "subsystem_ticket".to_string(),
+            target_id: None,
+            system_id,
+            tenant_id,
+            result: "failure",
+            before_data: None,
+            after_data: None,
+            failure_reason: Some(reason.to_string()),
+            ip_address: None,
+            user_agent: None,
+        },
+    )
+    .await;
 }

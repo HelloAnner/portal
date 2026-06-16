@@ -16,6 +16,10 @@ interface HomeData {
   allowPermissionRequest?: boolean;
 }
 
+interface SetupStatus {
+  needsSetup: boolean;
+}
+
 export default function PortalHomePage() {
   const router = useRouter();
   const [data, setData] = useState<HomeData | null>(null);
@@ -25,6 +29,11 @@ export default function PortalHomePage() {
   async function load(tId?: string) {
     setLoading(true);
     try {
+      const setup = await fetchApi<SetupStatus>("/api/setup/status");
+      if (setup.needsSetup) {
+        router.push("/setup");
+        return;
+      }
       const url = tId ? `/api/portal/home?tenantId=${tId}` : "/api/portal/home";
       const homeData = await fetchApi<HomeData>(url);
       setData(homeData);

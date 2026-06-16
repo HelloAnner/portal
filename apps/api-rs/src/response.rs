@@ -63,6 +63,7 @@ where
     }
 
     fn call(&mut self, req: Request<ReqBody>) -> Self::Future {
+        let path = req.uri().path().to_string();
         let request_id = req
             .extensions()
             .get::<String>()
@@ -96,6 +97,11 @@ where
                 .get("content-type")
                 .and_then(|v| v.to_str().ok())
                 .unwrap_or("");
+
+            if should_skip_envelope(&path) {
+                let response = Response::from_parts(parts, Body::from(bytes));
+                return Ok(response);
+            }
 
             if !content_type.starts_with("application/json") || bytes.is_empty() {
                 let response = Response::from_parts(parts, Body::from(bytes));
@@ -134,4 +140,8 @@ where
                 .unwrap())
         })
     }
+}
+
+fn should_skip_envelope(path: &str) -> bool {
+    matches!(path, "/api/auth/exchange-ticket")
 }

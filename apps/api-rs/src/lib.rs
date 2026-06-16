@@ -70,6 +70,7 @@ pub fn router(_state: AppState) -> Router<AppState> {
         .merge(api::profile_router())
         .merge(api::me_router())
         .merge(api::admin_router())
+        .merge(api::setup_router())
         .fallback(static_or_spa)
         .layer(EnvelopeLayer)
         .layer(from_fn(audit_middleware))
@@ -105,6 +106,18 @@ async fn ready() -> &'static str {
 
 async fn static_or_spa(req: axum::http::Request<Body>) -> Response<Body> {
     let path = req.uri().path();
+    if path.starts_with("/api/") {
+        let body = serde_json::json!({
+            "code": "NOT_FOUND",
+            "message": "API endpoint not found",
+        });
+        return Response::builder()
+            .status(StatusCode::NOT_FOUND)
+            .header("content-type", "application/json")
+            .body(Body::from(body.to_string()))
+            .unwrap();
+    }
+
     if let Some(asset) = web_embed::get_asset(path) {
         return Response::builder()
             .status(StatusCode::OK)

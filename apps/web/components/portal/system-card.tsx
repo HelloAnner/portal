@@ -44,7 +44,13 @@ export function SystemCard({
       if (data.callbackUrl) {
         const url = new URL(data.callbackUrl);
         url.searchParams.set("code", data.code);
-        window.location.href = url.toString();
+        const opened = window.open(url.toString(), "_blank");
+        if (opened) {
+          opened.opener = null;
+        }
+        if (!opened) {
+          window.location.href = url.toString();
+        }
       } else {
         alert("进入失败");
       }

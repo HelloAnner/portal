@@ -19,28 +19,44 @@
 
 在处理本项目问题时，优先理解门户系统作为统一入口的职责边界。若问题涉及数据库问数、文档 RAG、登录态传递、用户体系联动或跨系统跳转，可以同时查看 `Northline` 和 `Documind` 相关代码，确认端到端逻辑后再修改。
 
+# 运行环境
+
+- `ssh northline` 是服务器环境，不是普通跳板机；部署、端口、日志、PostgreSQL / Redis / RabbitMQ 等运行时状态都以这台机器为准。
+- 默认优先服务器环境：部署、排查、验收和端到端测试都先在 `ssh northline` 上确认，不默认使用本地环境复现。
+- 本地仓库主要用于开发、阅读代码和构建产物；除非用户明确要求，本地不作为默认部署或测试环境。
+- 门户、Northline、DocuMind 这三个系统都以服务器当前运行状态为准；排查问题时先确认服务器上的进程、端口、日志和数据。
+- 服务器部署采用 `releases/<timestamp>` + `current` + `shared` 的发布结构。
+- 门户服务器部署根目录是 `/opt/portal`，本地端口 `7777`，对外通过 Nginx `:6688/` 和 `:6688/portal/` 访问。
+- 本地 Northline 源代码位于 `$HOME/Northline`，必要时可以查看其 `Makefile`、部署脚本和 `AGENTS.md` 作为同机部署参考。
+- DocuMind 服务端口固定为服务器本地 `5555`，对外通过原生 Nginx 的 `:6688/documind/` 访问。
+- Northline 同机运行，Nginx 的 `:6688/northline/` 代理到服务器本地 Northline 端口 `6666`。
+- 当前门户联调以门户登录为统一入口，用户登录门户后通过门户下发的一次性 ticket 进入 Northline 或 DocuMind。
+- 服务器当前联调超级管理员账号用于验收模拟：`admin` / `adminadmin`。
+
 # 本地开发
 
 门户后端已迁移为 Rust（Axum + SQLx）实现，前端为 Next.js 应用，通过 `/api/*` 调用 Rust 后端。
 
-1. 确保 PostgreSQL 在本地运行（默认端口 5432，数据库/用户/密码均为 portal）。可用 Docker：
-   ```bash
-   docker run -d --name portal-postgres -e POSTGRES_USER=portal -e POSTGRES_PASSWORD=portal -e POSTGRES_DB=portal -p 5432:5432 postgres:16-alpine
-   ```
-2. 安装依赖：`pnpm install`
-3. 构建 Rust 后端：`cargo build --release --bin portal-api`
-4. 初始化数据：`pnpm db:seed`（对应 `cargo run --bin portal-seed`）
-5. 启动 Rust API：`pnpm dev:api`（默认端口 8080）
-<<<<<<< HEAD
-6. 启动前端开发服务器：`pnpm dev`（默认端口 3000，通过 `NEXT_PUBLIC_API_URL` 调用 Rust 后端）
-||||||| parent of ec7dff3 (feat: 将后端从 Next.js 迁移至 Rust (Axum + SQLx))
-3. 同步数据库：`pnpm db:migrate`
-4. 初始化数据：`pnpm db:seed`
-5. 启动服务：`pnpm dev`（默认端口 8080）
-6. 默认管理员账号：`admin` / `admin123`
-=======
-6. 启动前端开发服务器：`pnpm dev`（默认端口 3000，通过 `next.config.ts` 代理 `/api/*` 到 Rust 后端）
->>>>>>> ec7dff3 (feat: 将后端从 Next.js 迁移至 Rust (Axum + SQLx))
-7. 默认管理员账号：`admin` / `admin123`
+- 本地只作为开发和构建环境，不作为默认排查、部署或验收环境。
+- 本地检查优先使用 `cargo check -p portal-api` 和 `pnpm --filter @portal/web build`。
+- Fresh DB 不再默认创建管理员；首次访问门户会进入 `/setup` 配置超级管理员。
 
 生产部署时，先构建前端静态产物（`apps/web/out`），再由 `portal-api` 二进制直接托管静态资源并提供 API。
+
+
+<claude-mem-context>
+# Memory Context
+
+# claude-mem status
+
+This project has no memory yet. The current session will seed it; subsequent sessions will receive auto-injected context for relevant past work.
+
+Memory injection starts on your second session in a project.
+
+`/learn-codebase` is available if the user wants to front-load the entire repo into memory in a single pass (~5 minutes on a typical repo, optional). Otherwise memory builds passively as work happens.
+
+Live activity: http://localhost:37701
+How it works: `/how-it-works`
+
+This message disappears once the first observation lands.
+</claude-mem-context>

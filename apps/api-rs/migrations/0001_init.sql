@@ -1,30 +1,30 @@
 DO $$
 BEGIN
-    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'UserStatus') THEN
+    IF to_regtype('"UserStatus"') IS NULL THEN
         CREATE TYPE "UserStatus" AS ENUM ('active', 'disabled', 'pending', 'archived');
     END IF;
-    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'RoleType') THEN
+    IF to_regtype('"RoleType"') IS NULL THEN
         CREATE TYPE "RoleType" AS ENUM ('super_admin', 'normal', 'subsystem_admin', 'custom');
     END IF;
-    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'TenantStatus') THEN
+    IF to_regtype('"TenantStatus"') IS NULL THEN
         CREATE TYPE "TenantStatus" AS ENUM ('active', 'disabled', 'archived');
     END IF;
-    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'SystemStatus') THEN
+    IF to_regtype('"SystemStatus"') IS NULL THEN
         CREATE TYPE "SystemStatus" AS ENUM ('active', 'disabled', 'onboarding', 'maintenance');
     END IF;
-    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'SubjectType') THEN
+    IF to_regtype('"SubjectType"') IS NULL THEN
         CREATE TYPE "SubjectType" AS ENUM ('user', 'role', 'tenant');
     END IF;
-    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'AdminType') THEN
+    IF to_regtype('"AdminType"') IS NULL THEN
         CREATE TYPE "AdminType" AS ENUM ('system', 'tenant', 'module', 'resource', 'organization');
     END IF;
-    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'GrantStatus') THEN
+    IF to_regtype('"GrantStatus"') IS NULL THEN
         CREATE TYPE "GrantStatus" AS ENUM ('active', 'inactive', 'expired');
     END IF;
-    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'AuthMode') THEN
+    IF to_regtype('"AuthMode"') IS NULL THEN
         CREATE TYPE "AuthMode" AS ENUM ('jwt', 'authorization_code');
     END IF;
-    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'AuditResult') THEN
+    IF to_regtype('"AuditResult"') IS NULL THEN
         CREATE TYPE "AuditResult" AS ENUM ('success', 'failure');
     END IF;
 END $$;

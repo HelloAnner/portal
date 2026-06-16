@@ -1,4 +1,4 @@
-use std::net::SocketAddr;
+use std::{collections::HashSet, net::SocketAddr};
 
 use axum::{
     extract::{ConnectInfo, Query, State},
@@ -16,7 +16,7 @@ use uuid::Uuid;
 use crate::auth::{load_current_user, CurrentSession};
 use crate::error::AppError;
 use crate::middleware::RequestId;
-use crate::models::{SystemAccess, SystemStatus};
+use crate::models::{SystemAccess, SystemStatus, TenantStatus};
 use crate::services::audit::{write_audit, AuditPayload};
 use crate::services::permissions;
 use crate::state::AppState;
@@ -24,7 +24,7 @@ use crate::state::AppState;
 pub fn router() -> Router<AppState> {
     Router::new()
         .route("/api/portal/home", get(home))
-        .route("/api/portal/systems/{system_code}/enter", post(enter))
+        .route("/api/portal/systems/:system_code/enter", post(enter))
 }
 
 #[derive(Deserialize)]
@@ -256,6 +256,23 @@ async fn enter(
         return Err(AppError::TenantDisabled);
     }
 
+    let tenant_row = sqlx::query(
+        r#"SELECT id, code, name, status as "status"
+           FROM portal_tenants
+           WHERE id = $1"#,
+    )
+    .bind(tenant_id)
+    .fetch_optional(&state.db)
+    .await
+    .map_err(|e| AppError::Internal(anyhow::anyhow!("tenant query failed: {}", e)))?;
+
+    let tenant_row = tenant_row.ok_or(AppError::TenantDisabled)?;
+    if !matches!(tenant_row.get::<TenantStatus, _>("status"), TenantStatus::Active) {
+        return Err(AppError::TenantDisabled);
+    }
+    let tenant_code: String = tenant_row.get("code");
+    let tenant_name: String = tenant_row.get("name");
+
     let access = permissions::get_user_system_access(&state.db, session.user.id, system_id, tenant_id)
         .await?;
 
@@ -301,6 +318,7 @@ async fn enter(
     .fetch_all(&state.db)
     .await
     .map_err(|e| AppError::Internal(anyhow::anyhow!("roles query failed: {}", e)))?;
+    let subsystem_roles = subsystem_role_codes(&access.system_roles, &roles);
 
     let issued_at = Utc::now();
     let expires_at = issued_at + Duration::seconds(state.config.jwt.token_ttl_seconds);
@@ -312,9 +330,11 @@ async fn enter(
         "email": session.user.email,
         "avatarUrl": session.user.avatar_url,
         "tenantId": tenant_id,
+        "tenantCode": tenant_code,
+        "tenantName": tenant_name,
         "systemCode": system_code,
         "portalRoles": roles,
-        "systemRoles": access.system_roles,
+        "systemRoles": subsystem_roles,
         "permissions": access.permissions,
         "adminScopes": access.scopes,
         "issuedAt": issued_at.timestamp(),
@@ -395,4 +415,58 @@ fn generate_random_token(length: usize) -> String {
     (0..length)
         .map(|_| chars[rng.gen_range(0..chars.len())])
         .collect()
+}
+
+fn subsystem_role_codes(system_roles: &[String], portal_roles: &[String]) -> Vec<String> {
+    let mut roles = HashSet::new();
+
+    for role in system_roles {
+        if let Some(mapped) = map_subsystem_role(role) {
+            roles.insert(mapped);
+        }
+    }
+
+    for role in portal_roles {
+        if let Some(mapped) = map_portal_role_for_subsystem(role) {
+            roles.insert(mapped);
+        }
+    }
+
+    if roles.is_empty() {
+        roles.insert("user".to_string());
+    }
+
+    let mut list: Vec<String> = roles.into_iter().collect();
+    list.sort();
+    list
+}
+
+fn map_subsystem_role(role: &str) -> Option<String> {
+    match role {
+        "super-admin" | "super_admin" => Some("super_admin".to_string()),
+        "tenant-admin" | "tenant_admin" => Some("tenant_admin".to_string()),
+        "module-admin" | "module_admin" => Some("team_admin".to_string()),
+        "data-admin" | "data_admin" => Some("data_admin".to_string()),
+        "admin" => Some("enterprise_admin".to_string()),
+        "user" | "viewer" | "analyst" | "enterprise_admin" | "team_admin" => {
+            Some(role.to_string())
+        }
+        _ => None,
+    }
+}
+
+fn map_portal_role_for_subsystem(role: &str) -> Option<String> {
+    match role {
+        "super-admin" | "super_admin" => Some("super_admin".to_string()),
+        "tenant-owner" | "tenant_owner" => Some("tenant_owner".to_string()),
+        "tenant-admin" | "tenant_admin" => Some("tenant_admin".to_string()),
+        "module-admin" | "module_admin" | "subsystem-admin" | "subsystem_admin" => {
+            Some("team_admin".to_string())
+        }
+        "admin" | "enterprise-admin" | "enterprise_admin" => Some("enterprise_admin".to_string()),
+        "normal-user" | "normal_user" | "normal" | "user" | "viewer" | "end_user" => {
+            Some("user".to_string())
+        }
+        _ => None,
+    }
 }

@@ -4,6 +4,10 @@
 
 子系统接入功能定义 Northline、DocuMind 等系统如何接入门户，以及接入后如何与门户完成身份、权限和管理员定位的协作。
 
+## 相关方案
+
+- [门户登录态对接 Northline 与 DocuMind 方案](./PORTAL_SSO_NORTHLINE_DOCUMIND.md)：梳理当前门户、Northline、DocuMind 的认证现状，并定义门户登录后携带身份上下文进入子系统的对接协议、角色映射和实施步骤。
+
 ## 接入原则
 
 子系统可以有两种部署模式：

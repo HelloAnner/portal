@@ -45,9 +45,21 @@ pub async fn connect_database(config: &AppConfig) -> Result<PgPool, AppError> {
     }
 
     let schema = &db.schema;
+    let search_path = format!(
+        "SET search_path TO \"{}\", public",
+        schema.replace('"', "\\\"")
+    );
+    let connection_search_path = search_path.clone();
     let pool = match PgPoolOptions::new()
         .max_connections(10)
         .acquire_timeout(std::time::Duration::from_secs(5))
+        .after_connect(move |conn, _meta| {
+            let search_path = connection_search_path.clone();
+            Box::pin(async move {
+                conn.execute(search_path.as_str()).await?;
+                Ok(())
+            })
+        })
         .connect(&url)
         .await
     {
@@ -64,10 +76,6 @@ pub async fn connect_database(config: &AppConfig) -> Result<PgPool, AppError> {
         .await
         .map_err(|e| AppError::Internal(anyhow::anyhow!("create schema failed: {}", e)))?;
 
-    let search_path = format!(
-        "SET search_path TO \"{}\", public",
-        schema.replace('"', "\\\"")
-    );
     pool.execute(search_path.as_str())
         .await
         .map_err(|e| AppError::Internal(anyhow::anyhow!("set search_path failed: {}", e)))?;
