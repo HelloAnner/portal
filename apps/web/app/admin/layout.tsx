@@ -6,6 +6,8 @@ import { AdminSidebar } from "@/components/admin/sidebar";
 
 interface MeData {
   canEnterAdmin: boolean;
+  displayName?: string;
+  isSuperAdmin?: boolean;
 }
 
 export default async function AdminLayout({
@@ -13,9 +15,10 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
+  let me: MeData;
   try {
     const cookieHeader = cookies().toString();
-    const me = await fetchApi<MeData>("/api/auth/me", {
+    me = await fetchApi<MeData>("/api/auth/me", {
       headers: { Cookie: cookieHeader },
     });
     if (!me.canEnterAdmin) {
@@ -27,15 +30,19 @@ export default async function AdminLayout({
 
   return (
     <div className="flex min-h-screen bg-bg-primary">
-      <AdminSidebar />
-      <div className="flex flex-1 flex-col overflow-hidden">
-        <header className="flex h-[60px] items-center justify-between border-b border-border-subtle bg-bg-secondary px-6">
-          <span className="text-base font-semibold text-text-primary">管理后台</span>
+      <AdminSidebar
+        showAdmin
+        displayName={me.displayName || "Portal Admin"}
+        roleLabel={me.isSuperAdmin ? "Super Admin" : "Admin"}
+      />
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        <header className="flex h-16 items-center justify-between bg-bg-primary px-8">
+          <span className="text-sm font-semibold text-text-primary">Portal Admin</span>
           <Link href="/" className="text-sm text-text-secondary hover:text-text-primary">
             返回门户首页
           </Link>
         </header>
-        <main className="flex-1 overflow-auto p-6">{children}</main>
+        <main className="flex-1 overflow-auto px-8 pb-8">{children}</main>
       </div>
     </div>
   );

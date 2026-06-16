@@ -6646,17 +6646,17 @@
       "id": "iSCIB",
       "x": 2740,
       "y": 0,
-      "name": "Portal",
+      "name": "Portal (Admin view)",
       "clip": true,
       "width": 1440,
       "height": 1024,
       "fill": "$canvas-parchment",
       "children": [
         {
-          "id": "Tn6KV",
+          "id": "bm2LT",
           "type": "ref",
-          "ref": "MQVEj",
-          "name": "Sidebar/User",
+          "ref": "O2HyC",
+          "name": "Sidebar",
           "height": "fill_container"
         },
         {
@@ -6706,7 +6706,7 @@
                       "fill": "$text-primary",
                       "textGrowth": "fixed-width",
                       "width": "fill_container",
-                      "content": "Meet your enterprise portal.",
+                      "content": "Manage the portal.",
                       "textAlign": "center",
                       "fontFamily": "Inter",
                       "fontSize": 48,
@@ -6720,7 +6720,7 @@
                       "fill": "$text-secondary",
                       "textGrowth": "fixed-width",
                       "width": 720,
-                      "content": "One entry to every system, every team, every insight.",
+                      "content": "Users, tenants, systems, and security — all in one place.",
                       "textAlign": "center",
                       "fontFamily": "Inter",
                       "fontSize": 24
@@ -6776,7 +6776,7 @@
                       "fill": "$text-primary",
                       "textGrowth": "fixed-width",
                       "width": "fill_container",
-                      "content": "Your systems",
+                      "content": "Administration",
                       "fontFamily": "Inter",
                       "fontSize": 28,
                       "fontWeight": "600",
@@ -6789,7 +6789,7 @@
                       "fill": "$text-secondary",
                       "textGrowth": "fixed-width",
                       "width": "fill_container",
-                      "content": "Quick access to the tools you use most.",
+                      "content": "Manage access, tenants, and system connections.",
                       "fontFamily": "Inter",
                       "fontSize": 17
                     }
@@ -6810,13 +6810,16 @@
                       "width": "fill_container",
                       "descendants": {
                         "Zcext": {
-                          "icon": "database"
+                          "icon": "layout-dashboard"
                         },
                         "Uj60R": {
-                          "content": "Northline"
+                          "content": "Overview"
                         },
                         "vpWLj": {
-                          "content": "Database analytics"
+                          "content": "Dashboard and metrics."
+                        },
+                        "RGg2Y/ZFpGJ": {
+                          "content": "查看"
                         }
                       }
                     },
@@ -6828,13 +6831,16 @@
                       "width": "fill_container",
                       "descendants": {
                         "Zcext": {
-                          "icon": "file-text"
+                          "icon": "users"
                         },
                         "Uj60R": {
-                          "content": "DocuMind"
+                          "content": "Users"
                         },
                         "vpWLj": {
-                          "content": "Document RAG"
+                          "content": "Manage users and roles."
+                        },
+                        "RGg2Y/ZFpGJ": {
+                          "content": "管理"
                         }
                       }
                     },
@@ -6846,13 +6852,16 @@
                       "width": "fill_container",
                       "descendants": {
                         "Zcext": {
-                          "icon": "user"
+                          "icon": "building-2"
                         },
                         "Uj60R": {
-                          "content": "Profile"
+                          "content": "Tenants"
                         },
                         "vpWLj": {
-                          "content": "Your account"
+                          "content": "Tenant configuration."
+                        },
+                        "RGg2Y/ZFpGJ": {
+                          "content": "管理"
                         }
                       }
                     },
@@ -6864,13 +6873,16 @@
                       "width": "fill_container",
                       "descendants": {
                         "Zcext": {
-                          "icon": "shield"
+                          "icon": "app-window"
                         },
                         "Uj60R": {
-                          "content": "Permissions"
+                          "content": "Systems"
                         },
                         "vpWLj": {
-                          "content": "Access control"
+                          "content": "System catalog and access."
+                        },
+                        "RGg2Y/ZFpGJ": {
+                          "content": "管理"
                         }
                       }
                     }
@@ -6887,18 +6899,53 @@
       "id": "NvRY6",
       "x": 4260,
       "y": 0,
-      "name": "Portal Admin",
+      "name": "Portal (User view)",
       "clip": true,
       "width": 1440,
       "height": 1024,
       "fill": "$canvas-parchment",
       "children": [
         {
-          "id": "nVWgr",
+          "id": "JAxOy",
           "type": "ref",
-          "ref": "TBgil",
-          "name": "Sidebar/Admin",
-          "height": "fill_container"
+          "ref": "O2HyC",
+          "name": "Sidebar",
+          "height": "fill_container",
+          "descendants": {
+            "WIXEf": {
+              "enabled": false
+            },
+            "V5Lj4p": {
+              "enabled": false
+            },
+            "GuP9m": {
+              "enabled": false
+            },
+            "TMF5c": {
+              "enabled": false
+            },
+            "y2HU4": {
+              "enabled": false
+            },
+            "q7nhJ": {
+              "enabled": false
+            },
+            "g8DcNM": {
+              "enabled": false
+            },
+            "pOvgg": {
+              "enabled": false
+            },
+            "T4nIy": {
+              "enabled": false
+            },
+            "LgH8j": {
+              "enabled": false
+            },
+            "iHrJj": {
+              "enabled": false
+            }
+          }
         },
         {
           "type": "frame",
@@ -6947,7 +6994,7 @@
                       "fill": "$text-primary",
                       "textGrowth": "fixed-width",
                       "width": "fill_container",
-                      "content": "Manage the portal.",
+                      "content": "Meet your enterprise portal.",
                       "textAlign": "center",
                       "fontFamily": "Inter",
                       "fontSize": 48,
@@ -6961,7 +7008,7 @@
                       "fill": "$text-secondary",
                       "textGrowth": "fixed-width",
                       "width": 720,
-                      "content": "Users, tenants, systems, and security — all in one place.",
+                      "content": "One entry to every system, every team, every insight.",
                       "textAlign": "center",
                       "fontFamily": "Inter",
                       "fontSize": 24
@@ -7017,7 +7064,7 @@
                       "fill": "$text-primary",
                       "textGrowth": "fixed-width",
                       "width": "fill_container",
-                      "content": "Administration",
+                      "content": "Your systems",
                       "fontFamily": "Inter",
                       "fontSize": 28,
                       "fontWeight": "600",
@@ -7030,7 +7077,7 @@
                       "fill": "$text-secondary",
                       "textGrowth": "fixed-width",
                       "width": "fill_container",
-                      "content": "Manage access, tenants, and system connections.",
+                      "content": "Quick access to the tools you use most.",
                       "fontFamily": "Inter",
                       "fontSize": 17
                     }
@@ -7051,16 +7098,16 @@
                       "width": "fill_container",
                       "descendants": {
                         "Zcext": {
-                          "icon": "layout-dashboard"
+                          "icon": "database"
                         },
                         "Uj60R": {
-                          "content": "Overview"
+                          "content": "Northline"
                         },
                         "vpWLj": {
-                          "content": "Dashboard and metrics."
+                          "content": "Database analytics"
                         },
                         "RGg2Y/ZFpGJ": {
-                          "content": "查看"
+                          "content": "进入"
                         }
                       }
                     },
@@ -7072,16 +7119,16 @@
                       "width": "fill_container",
                       "descendants": {
                         "Zcext": {
-                          "icon": "users"
+                          "icon": "file-text"
                         },
                         "Uj60R": {
-                          "content": "Users"
+                          "content": "DocuMind"
                         },
                         "vpWLj": {
-                          "content": "Manage users and roles."
+                          "content": "Document RAG"
                         },
                         "RGg2Y/ZFpGJ": {
-                          "content": "管理"
+                          "content": "进入"
                         }
                       }
                     },
@@ -7093,16 +7140,16 @@
                       "width": "fill_container",
                       "descendants": {
                         "Zcext": {
-                          "icon": "building-2"
+                          "icon": "user"
                         },
                         "Uj60R": {
-                          "content": "Tenants"
+                          "content": "Profile"
                         },
                         "vpWLj": {
-                          "content": "Tenant configuration."
+                          "content": "Your account"
                         },
                         "RGg2Y/ZFpGJ": {
-                          "content": "管理"
+                          "content": "进入"
                         }
                       }
                     },
@@ -7114,16 +7161,16 @@
                       "width": "fill_container",
                       "descendants": {
                         "Zcext": {
-                          "icon": "app-window"
+                          "icon": "shield"
                         },
                         "Uj60R": {
-                          "content": "Systems"
+                          "content": "Permissions"
                         },
                         "vpWLj": {
-                          "content": "System catalog and access."
+                          "content": "Access control"
                         },
                         "RGg2Y/ZFpGJ": {
-                          "content": "管理"
+                          "content": "进入"
                         }
                       }
                     }
@@ -15131,6 +15178,378 @@
                   ]
                 }
               ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "O2HyC",
+      "x": 1360,
+      "y": 12640,
+      "name": "Sidebar/Unified",
+      "reusable": true,
+      "width": 260,
+      "height": "fill_container(0)",
+      "fill": "$canvas",
+      "layout": "vertical",
+      "gap": 6,
+      "padding": 16,
+      "children": [
+        {
+          "type": "frame",
+          "id": "uopeL",
+          "name": "Logo",
+          "width": "fill_container",
+          "gap": 10,
+          "padding": [
+            10,
+            12
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "icon",
+              "id": "IyjZ8",
+              "name": "LogoIcon",
+              "width": 24,
+              "height": 24,
+              "icon": "hexagon",
+              "library": "lucide",
+              "fill": "$accent-primary"
+            },
+            {
+              "type": "text",
+              "id": "BUsx2",
+              "name": "LogoText",
+              "fill": "$text-primary",
+              "content": "Portal",
+              "fontFamily": "Inter",
+              "fontSize": 18,
+              "fontWeight": "600"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "apwXI",
+          "name": "Section1Wrap",
+          "width": "fill_container",
+          "padding": [
+            10,
+            12
+          ],
+          "children": [
+            {
+              "type": "text",
+              "id": "Q2mBrw",
+              "name": "SectionMenu",
+              "fill": "$text-muted",
+              "content": "MENU",
+              "fontFamily": "Inter",
+              "fontSize": 11,
+              "fontWeight": "600"
+            }
+          ]
+        },
+        {
+          "id": "GipGt",
+          "type": "ref",
+          "ref": "GNUcf",
+          "name": "Home",
+          "fill": "$canvas-parchment",
+          "descendants": {
+            "vifiw": {
+              "icon": "home",
+              "fill": "$accent-primary"
+            },
+            "KvDn6": {
+              "content": "首页",
+              "fill": "$accent-primary",
+              "fontWeight": "600"
+            }
+          }
+        },
+        {
+          "id": "u6Dtuy",
+          "type": "ref",
+          "ref": "GNUcf",
+          "name": "Systems",
+          "descendants": {
+            "vifiw": {
+              "icon": "layout-grid"
+            },
+            "KvDn6": {
+              "content": "全部系统"
+            }
+          }
+        },
+        {
+          "id": "BgjC8",
+          "type": "ref",
+          "ref": "GNUcf",
+          "name": "Northline",
+          "descendants": {
+            "vifiw": {
+              "icon": "database"
+            },
+            "KvDn6": {
+              "content": "Northline"
+            }
+          }
+        },
+        {
+          "id": "TMJAz",
+          "type": "ref",
+          "ref": "GNUcf",
+          "name": "DocuMind",
+          "descendants": {
+            "vifiw": {
+              "icon": "file-text"
+            },
+            "KvDn6": {
+              "content": "DocuMind"
+            }
+          }
+        },
+        {
+          "id": "eUcZk",
+          "type": "ref",
+          "ref": "GNUcf",
+          "name": "Profile",
+          "descendants": {
+            "vifiw": {
+              "icon": "user"
+            },
+            "KvDn6": {
+              "content": "我的资料"
+            }
+          }
+        },
+        {
+          "id": "S4EZA",
+          "type": "ref",
+          "ref": "GNUcf",
+          "name": "Permissions",
+          "descendants": {
+            "vifiw": {
+              "icon": "shield"
+            },
+            "KvDn6": {
+              "content": "我的权限"
+            }
+          }
+        },
+        {
+          "type": "frame",
+          "id": "WIXEf",
+          "name": "Section2Wrap",
+          "width": "fill_container",
+          "padding": [
+            10,
+            12
+          ],
+          "children": [
+            {
+              "type": "text",
+              "id": "ldrDv",
+              "name": "SectionAdmin",
+              "fill": "$text-muted",
+              "content": "ADMIN",
+              "fontFamily": "Inter",
+              "fontSize": 11,
+              "fontWeight": "600"
+            }
+          ]
+        },
+        {
+          "id": "V5Lj4p",
+          "type": "ref",
+          "ref": "GNUcf",
+          "name": "Overview",
+          "descendants": {
+            "vifiw": {
+              "icon": "layout-dashboard"
+            },
+            "KvDn6": {
+              "content": "概览"
+            }
+          }
+        },
+        {
+          "id": "GuP9m",
+          "type": "ref",
+          "ref": "GNUcf",
+          "name": "Users",
+          "descendants": {
+            "vifiw": {
+              "icon": "users"
+            },
+            "KvDn6": {
+              "content": "用户管理"
+            }
+          }
+        },
+        {
+          "id": "TMF5c",
+          "type": "ref",
+          "ref": "GNUcf",
+          "name": "Tenants",
+          "descendants": {
+            "vifiw": {
+              "icon": "building-2"
+            },
+            "KvDn6": {
+              "content": "租户管理"
+            }
+          }
+        },
+        {
+          "id": "y2HU4",
+          "type": "ref",
+          "ref": "GNUcf",
+          "name": "Catalog",
+          "descendants": {
+            "vifiw": {
+              "icon": "app-window"
+            },
+            "KvDn6": {
+              "content": "系统目录"
+            }
+          }
+        },
+        {
+          "id": "q7nhJ",
+          "type": "ref",
+          "ref": "GNUcf",
+          "name": "PermissionConfig",
+          "descendants": {
+            "vifiw": {
+              "icon": "shield-check"
+            },
+            "KvDn6": {
+              "content": "权限配置"
+            }
+          }
+        },
+        {
+          "id": "g8DcNM",
+          "type": "ref",
+          "ref": "GNUcf",
+          "name": "SubAdmins",
+          "descendants": {
+            "vifiw": {
+              "icon": "user-cog"
+            },
+            "KvDn6": {
+              "content": "子系统管理员"
+            }
+          }
+        },
+        {
+          "id": "pOvgg",
+          "type": "ref",
+          "ref": "GNUcf",
+          "name": "Integration",
+          "descendants": {
+            "vifiw": {
+              "icon": "plug"
+            },
+            "KvDn6": {
+              "content": "子系统接入"
+            }
+          }
+        },
+        {
+          "id": "T4nIy",
+          "type": "ref",
+          "ref": "GNUcf",
+          "name": "Roles",
+          "descendants": {
+            "vifiw": {
+              "icon": "user-circle"
+            },
+            "KvDn6": {
+              "content": "角色管理"
+            }
+          }
+        },
+        {
+          "type": "frame",
+          "id": "LgH8j",
+          "name": "Section3Wrap",
+          "width": "fill_container",
+          "padding": [
+            10,
+            12
+          ],
+          "children": [
+            {
+              "type": "text",
+              "id": "Fjacs",
+              "name": "SectionSecurity",
+              "fill": "$text-muted",
+              "content": "SECURITY",
+              "fontFamily": "Inter",
+              "fontSize": 11,
+              "fontWeight": "600"
+            }
+          ]
+        },
+        {
+          "id": "iHrJj",
+          "type": "ref",
+          "ref": "GNUcf",
+          "name": "Audit",
+          "descendants": {
+            "vifiw": {
+              "icon": "scroll-text"
+            },
+            "KvDn6": {
+              "content": "安全与审计"
+            }
+          }
+        },
+        {
+          "type": "frame",
+          "id": "FSi54",
+          "name": "Spacer",
+          "width": "fill_container",
+          "height": "fill_container"
+        },
+        {
+          "type": "frame",
+          "id": "fRIRy",
+          "name": "Feedback",
+          "width": "fill_container",
+          "fill": "#00000000",
+          "cornerRadius": "$radius-sm",
+          "gap": 10,
+          "padding": [
+            10,
+            12
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "icon",
+              "id": "Tf8Mg",
+              "name": "FeedbackIcon",
+              "width": 20,
+              "height": 20,
+              "icon": "message-square",
+              "library": "lucide",
+              "fill": "$text-muted"
+            },
+            {
+              "type": "text",
+              "id": "ZBdk4",
+              "name": "FeedbackLabel",
+              "fill": "$text-muted",
+              "content": "Leave feedback",
+              "fontFamily": "Inter",
+              "fontSize": 14
             }
           ]
         }

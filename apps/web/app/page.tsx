@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { TopBar } from "@/components/portal/top-bar";
 import { SystemCard } from "@/components/portal/system-card";
 import { Button } from "@/components/ui/button";
+import { AdminSidebar } from "@/components/admin/sidebar";
 import { fetchApi, isAuthError, isPermissionError } from "@/lib/api-client";
 
 interface HomeData {
@@ -68,17 +69,46 @@ export default function PortalHomePage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-bg-primary">
+    <div className="flex min-h-screen bg-bg-primary">
+      <AdminSidebar
+        showAdmin={data.user.canEnterAdmin}
+        displayName={data.user.displayName}
+        roleLabel={data.user.canEnterAdmin ? "Admin" : "User"}
+      />
+      <div className="flex min-w-0 flex-1 flex-col">
       <TopBar
+        title="Portal"
         displayName={data.user.displayName}
         tenantName={data.currentTenant?.name}
         canEnterAdmin={data.user.canEnterAdmin}
       />
 
-      <main className="flex-1 p-6">
-        <div className="mx-auto max-w-6xl">
-          <div className="mb-6 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-text-primary">系统入口</h2>
+      <main className="flex-1 px-8 pb-8">
+        <div className="mx-auto max-w-7xl">
+          <section className="mb-10 rounded-radius-lg bg-bg-secondary px-8 py-16 text-center">
+            <h1 className="text-[34px] font-semibold leading-tight tracking-normal text-text-primary md:text-[40px]">
+              Meet your enterprise portal.
+            </h1>
+            <p className="mt-3 text-[17px] leading-[1.47] text-text-secondary">
+              One entry to every system, every team, every insight.
+            </p>
+            <div className="mt-6 flex justify-center gap-3">
+              <Button asChild>
+                <a href="#systems">查看系统</a>
+              </Button>
+              {data.user.canEnterAdmin && (
+                <Button variant="secondary" asChild>
+                  <a href="/admin">管理后台</a>
+                </Button>
+              )}
+            </div>
+          </section>
+
+          <div id="systems" className="mb-6 flex items-center justify-between">
+            <div>
+              <h2 className="text-[21px] font-semibold text-text-primary">Your systems</h2>
+              <p className="mt-1 text-sm text-text-muted">Systems available in the current tenant context.</p>
+            </div>
             {data.availableTenants.length > 1 && (
               <select
                 value={tenantId}
@@ -106,7 +136,7 @@ export default function PortalHomePage() {
               {data.groups.map((group) =>
                 group.systems.length === 0 ? null : (
                   <section key={group.key}>
-                    <h3 className="mb-3 text-sm font-medium uppercase tracking-wide text-text-muted">
+                    <h3 className="mb-3 text-[11px] font-semibold uppercase tracking-wide text-text-muted">
                       {group.title}
                     </h3>
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -131,6 +161,7 @@ export default function PortalHomePage() {
           )}
         </div>
       </main>
+      </div>
     </div>
   );
 }

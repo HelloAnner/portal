@@ -60,16 +60,17 @@ export function LoginForm() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-bg-primary p-6">
+    <main className="flex min-h-screen flex-col items-center justify-center bg-bg-secondary p-6">
       <div className="mb-8 text-center">
-        <h1 className="text-2xl font-semibold tracking-tight text-text-primary">企业门户</h1>
-        <p className="mt-2 text-sm text-text-muted">企业内部系统的统一入口</p>
+        <h1 className="text-[28px] font-semibold tracking-normal text-text-primary">企业门户</h1>
+        <p className="mt-2 text-sm text-text-muted">统一入口 · 统一身份 · 统一权限</p>
       </div>
 
       <div className="w-full max-w-sm rounded-radius-lg border border-border-subtle bg-bg-secondary p-8 shadow-none">
         <form onSubmit={handleSubmit} className="space-y-5">
+          <h2 className="text-[17px] font-semibold text-text-primary">登录</h2>
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-text-secondary">账号</label>
+            <label className="text-xs font-normal text-text-muted">账号</label>
             <Input
               value={username}
               onChange={(e) => setUsername(e.target.value)}
@@ -78,7 +79,7 @@ export function LoginForm() {
             />
           </div>
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-text-secondary">密码</label>
+            <label className="text-xs font-normal text-text-muted">密码</label>
             <Input
               type="password"
               value={password}
@@ -106,7 +107,17 @@ export function LoginForm() {
         </form>
 
         <div className="mt-6 border-t border-border-faint pt-5 text-center">
-          <p className="text-xs text-text-muted">企业 SSO / LDAP / OAuth 扩展位</p>
+          <p className="mb-3 text-xs text-text-muted">其他登录方式</p>
+          <div className="flex justify-center gap-2">
+            {["企业 SSO", "LDAP", "OAuth"].map((item) => (
+              <span
+                key={item}
+                className="rounded-full border border-primary px-3 py-1.5 text-xs text-primary"
+              >
+                {item}
+              </span>
+            ))}
+          </div>
         </div>
       </div>
     </main>

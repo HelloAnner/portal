@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { TopBar } from "@/components/portal/top-bar";
+import { AdminSidebar } from "@/components/admin/sidebar";
 import { PermissionList } from "@/components/portal/permission-list";
 import { SideDrawer } from "@/components/portal/side-drawer";
 import { SystemPermissionDetail } from "@/components/portal/system-permission-detail";
@@ -92,16 +93,28 @@ export default function PermissionsPage() {
     : null;
 
   return (
-    <div className="flex min-h-screen flex-col bg-bg-primary">
+    <div className="flex min-h-screen bg-bg-primary">
+      <AdminSidebar
+        showAdmin={me.canEnterAdmin}
+        displayName={me.displayName}
+        roleLabel={me.canEnterAdmin ? "Admin" : "User"}
+      />
+      <div className="flex min-w-0 flex-1 flex-col">
       <TopBar
+        title="我的权限"
         displayName={me.displayName}
         tenantName={me.tenants?.[0]?.name}
         canEnterAdmin={me.canEnterAdmin}
       />
 
-      <main className="flex-1 p-6">
-        <div className="mx-auto max-w-5xl">
-          <h1 className="mb-6 text-xl font-semibold text-text-primary">我的权限</h1>
+      <main className="flex-1 px-8 pb-8">
+        <div className="mx-auto max-w-6xl">
+          <div className="mb-6">
+            <h1 className="text-[34px] font-semibold leading-tight text-text-primary">我的权限</h1>
+            <p className="mt-2 text-[17px] leading-[1.47] text-text-secondary">
+              查看门户角色、租户范围、系统身份和权限来源。
+            </p>
+          </div>
 
           <PermissionList
             portalRoles={data.portalRoles}
@@ -119,6 +132,7 @@ export default function PermissionsPage() {
       >
         {selectedSystemCode && <SystemPermissionDetail systemCode={selectedSystemCode} />}
       </SideDrawer>
+      </div>
     </div>
   );
 }

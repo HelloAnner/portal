@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { AppWindow, ArrowUpRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { fetchApi, handleApiError } from "@/lib/api-client";
@@ -26,6 +27,7 @@ export function SystemCard({
   systemCode,
   name,
   description,
+  iconUrl,
   identityLabel,
   tenantLabel,
   permissionSummary,
@@ -66,13 +68,28 @@ export function SystemCard({
     status === "maintenance" ? "维护中" : status === "onboarding" ? "接入中" : "";
 
   return (
-    <div className="flex flex-col justify-between rounded-radius-md border border-border-subtle bg-bg-secondary p-5">
+    <article
+      id={systemCode}
+      className="flex min-h-[220px] flex-col justify-between rounded-radius-lg border border-border-subtle bg-bg-secondary p-6 transition-colors hover:border-primary/40"
+    >
       <div>
-        <div className="flex items-start justify-between gap-3">
-          <h3 className="text-base font-semibold text-text-primary">{name}</h3>
+        <div className="mb-5 flex items-start justify-between gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-radius-sm bg-bg-primary text-primary">
+            {iconUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={iconUrl} alt="" className="h-6 w-6 object-contain" />
+            ) : (
+              <AppWindow className="h-5 w-5" />
+            )}
+          </div>
           <Badge variant="identity">{identityLabel}</Badge>
         </div>
-        {description && <p className="mt-2 text-sm text-text-muted">{description}</p>}
+        <h3 className="text-[17px] font-semibold leading-snug text-text-primary">{name}</h3>
+        {description && (
+          <p className="mt-2 line-clamp-2 text-[14px] leading-[1.43] text-text-muted">
+            {description}
+          </p>
+        )}
         <div className="mt-3 flex flex-wrap gap-2">
           <Badge variant="default">{tenantLabel}</Badge>
           {permissionSummary.map((p) => (
@@ -90,9 +107,10 @@ export function SystemCard({
           disabled={!enterable || loading}
           onClick={enter}
         >
-          {loading ? "跳转中..." : enterable ? "进入系统" : "不可进入"}
+          {loading ? "跳转中..." : enterable ? "进入" : "不可进入"}
+          {enterable && !loading && <ArrowUpRight className="h-4 w-4" />}
         </Button>
       </div>
-    </div>
+    </article>
   );
 }

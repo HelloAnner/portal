@@ -73,13 +73,13 @@ export function NoPermissionContent() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-bg-primary p-6">
-      <div className="w-full max-w-md rounded-radius-lg border border-border-subtle bg-bg-secondary p-8 text-center">
-        <h1 className="text-2xl font-semibold text-text-primary">{context.title}</h1>
-        <p className="mt-3 text-sm text-text-secondary">{context.description}</p>
+      <div className="w-full max-w-lg rounded-radius-lg border border-border-subtle bg-bg-secondary p-10 text-center">
+        <h1 className="text-[34px] font-semibold leading-tight text-text-primary">{context.title}</h1>
+        <p className="mt-3 text-[17px] leading-[1.47] text-text-secondary">{context.description}</p>
 
         <div className="mt-5 flex flex-col gap-2 text-left text-sm text-text-secondary">
           {context.system && (
-            <div className="rounded-radius-sm bg-bg-tertiary p-3">
+            <div className="rounded-radius-sm bg-bg-tertiary p-4">
               <span className="text-text-muted">系统</span>
               <div className="mt-1 flex items-center gap-2">
                 <span className="font-medium text-text-primary">{context.system.name}</span>
@@ -88,7 +88,7 @@ export function NoPermissionContent() {
             </div>
           )}
           {context.tenant && (
-            <div className="rounded-radius-sm bg-bg-tertiary p-3">
+            <div className="rounded-radius-sm bg-bg-tertiary p-4">
               <span className="text-text-muted">租户</span>
               <div className="mt-1 flex items-center gap-2">
                 <span className="font-medium text-text-primary">{context.tenant.name}</span>

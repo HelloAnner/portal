@@ -51,6 +51,20 @@ interface MatrixData {
   rows: MatrixRow[];
 }
 
+interface AssignmentDraft {
+  id?: string;
+  visible: boolean;
+  accessible: boolean;
+  permissions: string[];
+  systemRoles: string[];
+  scopes: Array<{ scopeType: string; scopeCode: string }>;
+  sourceNote: string;
+  subjectType: "user" | "role" | "tenant";
+  subjectId: string;
+  tenantId: string;
+  systemId: string;
+}
+
 const views = [
   { key: "user", label: "用户视角" },
   { key: "tenant", label: "租户视角" },
@@ -78,6 +92,10 @@ export default function PermissionsPage() {
   const [error, setError] = useState("");
   const [saveKey, setSaveKey] = useState<string | null>(null);
   const [editCell, setEditCell] = useState<{ row: MatrixRow; colIndex: number } | null>(null);
+  const [effectiveUserId, setEffectiveUserId] = useState("");
+  const [effectiveTenantId, setEffectiveTenantId] = useState("");
+  const [effectiveSystemCode, setEffectiveSystemCode] = useState("");
+  const [effectiveResult, setEffectiveResult] = useState<unknown>(null);
 
   useEffect(() => {
     const params = new URLSearchParams({ view });
@@ -89,6 +107,11 @@ export default function PermissionsPage() {
         setData(matrix);
         setError("");
         if (matrix.tenantId && !tenantId) setTenantId(matrix.tenantId);
+        if (matrix.view === "user" && matrix.subjects[0] && !effectiveUserId) {
+          setEffectiveUserId(matrix.subjects[0].id);
+        }
+        if (matrix.tenants[0] && !effectiveTenantId) setEffectiveTenantId(matrix.tenants[0].id);
+        if (matrix.systems[0] && !effectiveSystemCode) setEffectiveSystemCode(matrix.systems[0].code);
       })
       .catch((err: unknown) => {
         if (handleRedirect(err)) return;
@@ -103,7 +126,7 @@ export default function PermissionsPage() {
     return view === "system" ? data.tenants : data.systems;
   }, [data, view]);
 
-  function buildAssignment(row: MatrixRow, colIndex: number, partial: Partial<MatrixCell>) {
+  function buildAssignment(row: MatrixRow, colIndex: number, partial: Partial<MatrixCell>): AssignmentDraft | null {
     if (!data) return null;
     const cell = row.cells[colIndex];
     const base = {
@@ -174,6 +197,32 @@ export default function PermissionsPage() {
     }
   }
 
+  async function previewCell(row: MatrixRow, colIndex: number, partial: Partial<MatrixCell>) {
+    const assignment = buildAssignment(row, colIndex, partial);
+    if (!assignment) return null;
+    return fetchApi<unknown>("/api/admin/permissions/preview", {
+      method: "POST",
+      body: JSON.stringify({ assignments: [assignment] }),
+    });
+  }
+
+  async function queryEffective() {
+    if (!effectiveUserId || !effectiveSystemCode) return;
+    const params = new URLSearchParams({
+      user_id: effectiveUserId,
+      system_code: effectiveSystemCode,
+    });
+    if (effectiveTenantId) params.set("tenant_id", effectiveTenantId);
+    try {
+      const result = await fetchApi<unknown>(`/api/admin/permissions/effective?${params.toString()}`);
+      setEffectiveResult(result);
+    } catch (err: unknown) {
+      if (handleRedirect(err)) return;
+      const { message } = handleApiError(err);
+      alert(message);
+    }
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -200,6 +249,49 @@ export default function PermissionsPage() {
             options={data.tenants.map((t) => ({ value: t.id, label: t.name }))}
           />
         </div>
+      )}
+
+      {data && (
+        <section className="rounded-radius-lg border border-border-subtle bg-bg-secondary p-4">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <div>
+              <h2 className="text-sm font-semibold text-text-primary">最终权限查询</h2>
+              <p className="mt-1 text-xs text-text-muted">查看某个用户进入子系统时实际下发的身份上下文。</p>
+            </div>
+            <Button variant="secondary" onClick={queryEffective} disabled={!effectiveUserId || !effectiveSystemCode}>
+              查询
+            </Button>
+          </div>
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+            <SelectField
+              label="用户"
+              value={effectiveUserId}
+              onChange={(e) => setEffectiveUserId(e.target.value)}
+              options={
+                view === "user"
+                  ? data.subjects.map((s) => ({ value: s.id, label: s.name }))
+                  : [{ value: effectiveUserId, label: effectiveUserId || "请切换到用户视角选择用户" }]
+              }
+            />
+            <SelectField
+              label="租户"
+              value={effectiveTenantId}
+              onChange={(e) => setEffectiveTenantId(e.target.value)}
+              options={data.tenants.map((t) => ({ value: t.id, label: t.name }))}
+            />
+            <SelectField
+              label="系统"
+              value={effectiveSystemCode}
+              onChange={(e) => setEffectiveSystemCode(e.target.value)}
+              options={data.systems.map((s) => ({ value: s.code, label: s.name }))}
+            />
+          </div>
+          {effectiveResult ? (
+            <pre className="mt-4 max-h-56 overflow-auto rounded-radius-sm bg-bg-tertiary p-3 text-xs text-text-secondary">
+              {JSON.stringify(effectiveResult, null, 2)}
+            </pre>
+          ) : null}
+        </section>
       )}
 
       {loading && <p className="text-text-muted">加载中...</p>}
@@ -294,6 +386,7 @@ export default function PermissionsPage() {
           data={data}
           onClose={() => setEditCell(null)}
           onSave={saveCell}
+          onPreview={previewCell}
         />
       )}
     </div>
@@ -305,9 +398,10 @@ interface EditDrawerProps {
   data: MatrixData;
   onClose: () => void;
   onSave: (row: MatrixRow, colIndex: number, partial: Partial<MatrixCell>) => Promise<void>;
+  onPreview: (row: MatrixRow, colIndex: number, partial: Partial<MatrixCell>) => Promise<unknown>;
 }
 
-function EditDrawer({ editCell, data, onClose, onSave }: EditDrawerProps) {
+function EditDrawer({ editCell, data, onClose, onSave, onPreview }: EditDrawerProps) {
   const { row, colIndex } = editCell;
   const cell = row.cells[colIndex];
   const colName = data.view === "system" ? data.tenants[colIndex].name : data.systems[colIndex].name;
@@ -317,24 +411,43 @@ function EditDrawer({ editCell, data, onClose, onSave }: EditDrawerProps) {
   const [systemRoles, setSystemRoles] = useState(cell.systemRoles.join(", "));
   const [scopes, setScopes] = useState(JSON.stringify(cell.scopes, null, 2));
   const [submitting, setSubmitting] = useState(false);
+  const [previewResult, setPreviewResult] = useState<unknown>(null);
 
-  async function submit() {
-    setSubmitting(true);
+  function buildPartial() {
     let parsedScopes: Array<{ scopeType: string; scopeCode: string }> = [];
     try {
       parsedScopes = scopes ? JSON.parse(scopes) : [];
     } catch {
       alert("scopes JSON 格式错误");
-      setSubmitting(false);
-      return;
+      return null;
     }
-    await onSave(row, colIndex, {
+    return {
       visible,
       accessible,
       permissions: permissions.split(",").map((s) => s.trim()).filter(Boolean),
       systemRoles: systemRoles.split(",").map((s) => s.trim()).filter(Boolean),
       scopes: parsedScopes,
-    });
+    };
+  }
+
+  async function preview() {
+    const partial = buildPartial();
+    if (!partial) return;
+    try {
+      const result = await onPreview(row, colIndex, partial);
+      setPreviewResult(result);
+    } catch (err: unknown) {
+      if (handleRedirect(err)) return;
+      const { message } = handleApiError(err);
+      alert(message);
+    }
+  }
+
+  async function submit() {
+    const partial = buildPartial();
+    if (!partial) return;
+    setSubmitting(true);
+    await onSave(row, colIndex, partial);
     onClose();
     setSubmitting(false);
   }
@@ -348,6 +461,9 @@ function EditDrawer({ editCell, data, onClose, onSave }: EditDrawerProps) {
         <div className="flex justify-end gap-2">
           <Button variant="secondary" onClick={onClose}>
             取消
+          </Button>
+          <Button variant="secondary" onClick={preview}>
+            预览差异
           </Button>
           <Button onClick={submit} disabled={submitting}>
             保存
@@ -382,6 +498,14 @@ function EditDrawer({ editCell, data, onClose, onSave }: EditDrawerProps) {
           <label className="text-sm font-medium text-text-secondary">管理范围（JSON）</label>
           <Textarea value={scopes} onChange={(e) => setScopes(e.target.value)} />
         </div>
+        {previewResult ? (
+          <div>
+            <label className="text-sm font-medium text-text-secondary">差异预览</label>
+            <pre className="mt-2 max-h-56 overflow-auto rounded-radius-sm bg-bg-tertiary p-3 text-xs text-text-secondary">
+              {JSON.stringify(previewResult, null, 2)}
+            </pre>
+          </div>
+        ) : null}
       </div>
     </Drawer>
   );

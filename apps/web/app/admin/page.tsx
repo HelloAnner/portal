@@ -42,14 +42,35 @@ export default function AdminOverviewPage() {
 
   return (
     <div className="space-y-8">
-      <h1 className="text-xl font-semibold text-text-primary">管理后台概览</h1>
+      <section className="rounded-radius-lg bg-bg-secondary px-8 py-14 text-center">
+        <h1 className="text-[34px] font-semibold leading-tight text-text-primary md:text-[40px]">
+          Manage the portal.
+        </h1>
+        <p className="mt-3 text-[17px] leading-[1.47] text-text-secondary">
+          Users, tenants, systems, and security — all in one place.
+        </p>
+        <div className="mt-6 flex justify-center gap-3">
+          <Link
+            href="/admin/users"
+            className="rounded-full bg-primary px-[22px] py-[11px] text-[15px] text-white hover:bg-primary-hover"
+          >
+            管理用户
+          </Link>
+          <Link
+            href="/admin/systems"
+            className="rounded-full border border-primary px-[22px] py-[10px] text-[15px] text-primary hover:bg-primary/5"
+          >
+            查看系统
+          </Link>
+        </div>
+      </section>
 
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
         {statCards.map((card) => (
           <Link
             key={card.key}
             href={card.href}
-            className="rounded-radius-md border border-border-subtle bg-bg-secondary p-5 hover:border-border-muted"
+            className="rounded-radius-lg border border-border-subtle bg-bg-secondary p-5 hover:border-primary/40"
           >
             <p className="text-xs uppercase tracking-wide text-text-muted">{card.label}</p>
             <p className="mt-2 text-3xl font-semibold text-text-primary">
