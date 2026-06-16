@@ -1,255 +1,445 @@
-# 门户系统设计规范
+# 门户设计系统
 
-## Overview
+对齐 Northline / DocuMind / Corevo 的设计语言：**单色为骨 · 层级为肉 · 几何为形**。
+不用彩色强调、不用装饰性阴影、不用戏剧化过渡。界面由近黑/近白的层级对比、发丝级边框、留白节奏共同支撑。
 
-门户系统采用 Apple 官网式的极简产品展示风格。界面由全出血的 "tile" 区块堆叠而成：纯白、羊皮纸、近黑三种表面交替，形成清晰的视觉节奏。所有交互元素统一使用单一 Action Blue，没有第二品牌色。UI 极度克制——无装饰性渐变、无卡片阴影、无多余边框，让内容本身成为焦点。
+> 所有 tokens 的真相来源是 `portal.pen` 中的变量定义，本文只做语义与用法说明。新增 token 请先更新 `portal.pen` 再同步本文。
 
-**核心特征：**
+---
 
-- 摄影/产品优先的展示方式，UI 退后成为画框。
-- 全出血 tile 交替：纯白 ↔ 羊皮纸 ↔ 近黑，颜色变化即分隔。
-- 单一蓝色强调色 `#0066cc` 承载所有交互：链接、主 CTA、焦点环。
-- 两种按钮语法：蓝色胶囊 CTA（`{rounded.pill}`）与紧凑工具矩形（`{rounded.sm}`）。
-- 字体使用 SF Pro Display（标题）+ SF Pro Text（正文），在 Pencil 中以 `system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif` 回退；必要时使用 Inter 作为跨平台替代。
-- 标题 600 字重 + 负字距，正文 17px / 400 / 1.47，刻意不使用 500 字重。
-- 仅有一种阴影：产品渲染图使用 `rgba(0, 0, 0, 0.22) 3px 5px 30px`；卡片、按钮、文字均无阴影。
+## 1. 设计哲学
 
-## 单页面架构
+1. **单色即最强的强调**——主操作/激活态用**反相**（暗色主题下白底黑字 / 亮色主题下黑底白字），**不用**紫色、蓝色或任何品牌色作为按钮/选中背景。
+2. **边界由层级与背景色表达**——避免粗描边，优先靠 `--bg-primary / secondary / tertiary / elevated` 三到四层背景堆叠做纵深。
+3. **边框只出现在必要处**——表格、卡片、输入框用 `--border-subtle`（不透明度 0.04–0.06）的发丝线，**禁止** 1px 以上或高对比描边。
+4. **阴影服务于悬浮，不服务于装饰**——抽屉、下拉、模态允许柔和大模糊阴影；卡片默认无阴影，只用边框 + 背景色差。
+5. **彩色仅用于状态反馈**——绿/红/琥珀/蓝仅出现在 success/error/warning/info 状态，不作为 UI 主色。
+6. **信息密度优先于留白美学**——后台/列表用行式密排（紧凑行高、发丝分隔线），只有欢迎/登录区才使用大号留白。
+7. **动效短而无声**——150ms 微过渡，200ms 常规，300ms 是上限；禁止超过 400ms 的“剧场式”过渡。
 
-门户收敛为单一页面「Portal」，所有入口通过左侧边栏访问：
+---
 
-- **左侧边栏（固定 260px，背景 `canvas` 纯白）**
-  - 顶部：品牌 Logo + "Portal" 字样。
-  - **普通用户可见**：首页、全部系统、Northline、DocuMind、我的资料、我的权限。
-  - **管理员额外可见**：概览、用户管理、租户管理、系统目录、权限配置、角色管理、子系统管理员、子系统接入、安全与审计。
-  - 底部：用户头像 + 名称 + 角色徽章，以及反馈/退出入口。
-- **右侧内容区**
-  - 顶部栏：当前页面标题、搜索胶囊、租户切换、通知与头像。
-  - 主内容区：根据当前选中的侧边栏入口切换内容；默认展示欢迎 Hero tile + 系统入口 utility cards 网格。
+## 2. 颜色系统
 
-所有入口统一在一个 `Sidebar/Unified` 可复用组件中，按角色实例化：普通用户版本隐藏管理员分组，管理员版本显示完整菜单。不存在独立的管理后台页面。
+### 2.1 背景层级（四层）
 
-## 色彩系统
+| Token | 暗色 | 亮色 | 用途 |
+|---|---|---|---|
+| `--bg-primary` | `#0A0A0F` | `#FAF9F7` | 应用画布（最底层）|
+| `--bg-secondary` | `#121218` | `#FFFFFF` | 卡片/面板/主操作区 |
+| `--bg-tertiary` | `#16161C` | `#F5F4F2` | 侧栏、次要容器、表头、输入框基底 |
+| `--bg-elevated` | `#1A1A20` | `#FFFFFF` | 悬浮容器（下拉、tooltip）|
 
-### 品牌与强调色
+**用法：** 永远靠背景层级差做分区，不靠描边。侧栏放 `--bg-tertiary` 贴在 `--bg-primary` 画布上，比一条 1px 竖线更内敛。
 
-| Token | Value | 用途 |
-|-------|-------|------|
-| `primary` | `#0066cc` | 所有交互元素：主 CTA、文字链接、焦点环 |
-| `primary-focus` | `#0071e3` | 按钮键盘焦点环 |
-| `primary-on-dark` | `#2997ff` | 暗色表面上的文字链接 |
+### 2.2 文字层级（五级）
 
-### 表面色
+| Token | 暗色 | 亮色 | 用途 |
+|---|---|---|---|
+| `--text-primary` | `#FAFAFA` | `#1A1A1A` | 主要内容、数字、按钮主文本 |
+| `--text-secondary` | `#E4E4E7` | `#3A3A3A` | 次要正文、表格 cell |
+| `--text-tertiary` | `#A1A1AA` | `#5A5A5A` | 辅助说明 |
+| `--text-muted` | `#71717A` | `#7A7A7A` | 标签、图标、panel title |
+| `--text-placeholder` | `#52525B` | `#9A9A9A` | 输入占位 |
 
-| Token | Value | 用途 |
-|-------|-------|------|
-| `canvas` | `#ffffff` | 主画布、内容区、白色卡片 |
-| `canvas-parchment` | `#f5f5f7` | 羊皮纸交替 tile、页脚、主内容区背景 |
-| `surface-pearl` | `#fafafc` | 次级幽灵按钮填充 |
-| `surface-tile-1` | `#272729` | 主暗色 tile |
-| `surface-tile-2` | `#2a2a2c` | 微亮的相邻暗色 tile |
-| `surface-tile-3` | `#252527` | 微暗的底部 tile / 视频框 |
-| `surface-black` | `#000000` | 全局导航栏背景 |
-| `surface-chip-translucent` | `#d2d2d7` | 悬浮在图片上的圆形控制按钮底色（64% 透明度） |
+### 2.3 边框（发丝）
 
-### 文字色
+| Token | 不透明度 | 用途 |
+|---|---|---|
+| `--border-subtle` | 0.04–0.06 | 默认边框（卡片、输入、表格）|
+| `--border-muted` | 0.03–0.04 | 极弱分隔（列表行间）|
+| `--border-faint` | 0.02–0.03 | 仅用于嵌套容器的内部分区 |
 
-| Token | Value | 用途 |
-|-------|-------|------|
-| `ink` | `#1d1d1f` | 标题、正文、深色按钮填充 |
-| `body` | `#1d1d1f` | 浅色表面上的正文（与 ink 同值） |
-| `body-on-dark` | `#ffffff` | 暗色 tile 与导航栏上的文字 |
-| `body-muted` | `#cccccc` | 暗色 tile 上的次级文字 |
-| `ink-muted-80` | `#333333` | 珍珠按钮上的文字 |
-| `ink-muted-48` | `#7a7a7a` | 禁用文字、法律小字 |
+**硬规则：** 不使用 `#ddd` / `#e5e5e5` 这种带色值的实线边框。边框永远是半透明叠加。
 
-### 分隔线与边框
+### 2.4 交互态
 
-| Token | Value | 用途 |
-|-------|-------|------|
-| `divider-soft` | `#f0f0f0` | 次级按钮的柔和边框 |
-| `hairline` | `#e0e0e0` | 卡片 1px 边框 |
+| Token | 暗色 | 亮色 | 用途 |
+|---|---|---|---|
+| `--hover-bg` | `rgba(255,255,255,0.05)` | `rgba(0,0,0,0.04)` | 常规悬停 |
+| `--hover-bg-strong` | `rgba(255,255,255,0.08)` | `rgba(0,0,0,0.06)` | 导航激活、强化悬停 |
+| `--selected-bg` | `rgba(255,255,255,0.06)` | `rgba(0,0,0,0.05)` | 选中（多选框、行）|
+| `--active-bg` | `rgba(255,255,255,0.10)` | `rgba(0,0,0,0.08)` | 按下态 |
 
-### 语义色
+### 2.5 语义色（只用于状态）
 
-| Token | Value | 用途 |
-|-------|-------|------|
-| `color-success` | `#34c759` | 成功、启用状态 |
-| `color-warning` | `#ff9500` | 维护中、警告 |
-| `color-error` | `#ff3b30` | 错误、禁用、异常 |
-| `color-info` | `#2997ff` | 信息提示（暗面链接同色） |
+```
+--color-success: #22C55E    /* 完成、启用 */
+--color-warning: #F59E0B    /* 维护中、审阅中 */
+--color-error:   #EF4444    /* 失败、已过期、删除 */
+--color-info:    #3B82F6    /* 提示、链接 */
+```
 
-## 字体与排版
+**用法：** 仅以 `color` 或**极低透明度的背景**（`rgba(ef4444, 0.1)`）出现在 badge / 状态点 / 错误文字。**禁止**语义色做填充按钮背景。
 
-### 字体家族
+### 2.6 玻璃（Glass）
 
-- **Display**：`SF Pro Display, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`
-- **Body / UI**：`SF Pro Text, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`
-- **替代方案**：跨平台无法使用 SF Pro 时，使用 Inter；标题需略微收紧 `letter-spacing`（约 `-0.01em`）以复现 Apple 紧致感。
+```
+--glass-bg:    rgba(18,18,24,0.82)    /* 暗 */ | rgba(255,255,255,0.92)  /* 亮 */
+--glass-blur:  12px                    /* 暗 */ | 8px                      /* 亮 */
+```
 
-### 层级
+**用法：** 仅用于浮层（顶栏、下拉）。不要把 blur 拉到 20px 以上。
 
-| Token | Size | Weight | Line Height | Letter Spacing | Use |
-|---|---|---|---|---|---|
-| `typography.hero-display` | 56px | 600 | 1.07 | -0.28px | Hero 大标题 |
-| `typography.display-lg` | 40px | 600 | 1.10 | 0 | 区块大标题 |
-| `typography.display-md` | 34px | 600 | 1.47 | -0.374px | 中型标题 |
-| `typography.lead` | 28px | 400 | 1.14 | 0.196px | 产品 tile 副标题 |
-| `typography.tagline` | 21px | 600 | 1.19 | 0.231px | 子导航分类名、副标题 |
-| `typography.body-strong` | 17px | 600 | 1.24 | -0.374px | 强调正文 |
-| `typography.body` | 17px | 400 | 1.47 | -0.374px | 默认正文 |
-| `typography.caption` | 14px | 400 | 1.43 | -0.224px | 次级说明、按钮文字 |
-| `typography.caption-strong` | 14px | 600 | 1.29 | -0.224px | 强调说明 |
-| `typography.button-utility` | 14px | 400 | 1.29 | -0.224px | 工具/导航按钮 |
-| `typography.fine-print` | 12px | 400 | 1.0 | -0.12px | 小字、法律声明 |
-| `typography.nav-link` | 12px | 400 | 1.0 | -0.12px | 全局导航链接 |
+---
 
-### 原则
+## 3. 间距与圆角
 
-- 标题使用 600 字重，不使用 700；正文使用 400，不使用 500。
-- 17px 及以上的字号使用负字距，营造 Apple 紧致排版。
-- 正文固定 17px / 1.47，这是 Apple 的阅读节奏。
+### 3.1 间距（8pt 近似阶梯）
 
-## 布局
+```
+--spacing-1: 4px     --spacing-6: 14px
+--spacing-2: 6px     --spacing-7: 16px
+--spacing-3: 8px     --spacing-8: 20px
+--spacing-4: 10px    --spacing-9: 24px
+--spacing-5: 12px    --spacing-10: 32px
+```
 
-### 间距系统
+**常用节奏：**
+- 图标与文字 gap：`8`
+- 行式列表上下 padding：`12`
+- 卡片内 padding：`16–20`
+- 区块之间 gap：`24–28`
+- 模态/抽屉主区 padding：`20–28`
 
-| Token | Value |
+### 3.2 圆角
+
+```
+--radius-sm:  8px    卡片、按钮、输入、下拉
+--radius-md:  10px   面板、次级容器
+--radius-lg:  12px   主要卡片、抽屉内部块
+--radius-xl:  16px   模态/抽屉本体
+--radius-2xl: 20px   超大模态
+```
+
+**硬规则：** 不使用 `border-radius: 9999px` 的胶囊按钮，除非是 pill 分段控件或状态徽标。
+
+---
+
+## 4. 字体排版
+
+**字体族：** Inter（西文） + 系统中文回退 → `'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`
+
+**字号阶梯（与 Northline/DocuMind 一致）：**
+
+| 场景 | 字号 | 字重 |
+|---|---|---|
+| 大号数字（stat card） | 26px | 700 |
+| 页面标题 | 20px | 600 |
+| 模态/抽屉标题 | 17px | 600 |
+| 侧栏分组标题 | 15px | 600 |
+| 卡片标题、表格标题 | 14–15px | 500–600 |
+| 正文、行条目 | 13–14px | 400–500 |
+| 表格 cell、导航项 | 13px | 400（激活 500）|
+| Panel Title（caps） | 12px | 600 + `uppercase` + `letter-spacing: 0.05em` |
+| 次级标签、元数据 | 11–12px | 400–500 |
+| 徽标文字 | 11px | 500 |
+
+**硬规则：**
+- 字重只用 `400 / 500 / 600 / 700` 四档。
+- 不使用 italic（除 hero 品牌字外）。
+- **Panel Title 必须用 uppercase + letter-spacing 0.05em + muted 色**，不用黑体大字充当小节标题。
+
+---
+
+## 5. 层级与深度
+
+### 5.1 层叠原则
+
+从底到上共四层，每层背景色微调，**不叠阴影**：
+
+```
+Canvas (bg-primary)
+  └─ Panel (bg-secondary) + border-subtle
+       └─ Inner row (透明 + border-bottom)
+            └─ Elevated (bg-elevated)
+```
+
+### 5.2 阴影（仅浮层）
+
+| 场景 | 阴影 |
 |---|---|
-| `spacing.xxs` | 4px |
-| `spacing.xs` | 8px |
-| `spacing.sm` | 12px |
-| `spacing.md` | 17px |
-| `spacing.lg` | 24px |
-| `spacing.xl` | 32px |
-| `spacing.xxl` | 48px |
-| `spacing.section` | 80px |
+| 下拉菜单 | `0 10px 40px rgba(0,0,0,0.5), 0 4px 16px rgba(0,0,0,0.3)` |
+| 模态 | `0 25px 50px -12px rgba(0,0,0,0.5)` |
+| 回到底部按钮 | `0 4px 12px rgba(0,0,0,0.3)` |
 
-- 区块内边距：`spacing.section`（80px）。
-- 卡片内边距：`spacing.lg`（24px）。
-- 按钮内边距：胶囊按钮 11px × 22px；工具按钮 8px × 15px。
+卡片、按钮、输入**一律无阴影**，靠边框和背景色差定层级。
 
-### 网格与容器
+---
 
-- 左侧边栏固定 260px。
-- 右侧内容区最大宽度随屏幕变化，通常 980px–1440px。
-- 系统入口卡片网格：桌面 3–4 列，平板 2 列，手机 1 列。
+## 6. 角色与信息架构
 
-### 留白哲学
+### 6.1 角色
 
-区块顶部至少预留 64px 空气，产品/卡片图像与最近内容保持 ≥40px 距离。侧边栏与内容区之间无多余分隔，依靠表面色差异区分。
+- **SuperAdmin（超级管理员）**：访问所有管理员入口。
+- **TenantAdmin（租户管理员）**：可管理本租户用户、角色、子系统授权。
+- **EndUser（普通用户）**：仅访问普通用户入口。
 
-## 层次与深度
+### 6.2 左侧边栏（固定 240px）
 
-| Level | Treatment | Use |
-|---|---|---|
-| Flat | 无阴影、无边框 | 全出血 tile、导航、页脚 |
-| Soft hairline | 1px `rgba(0,0,0,0.08)` 边框 | 工具卡片、次级导航分隔 |
-| Backdrop blur | 磨砂玻璃效果 | 粘性子导航、底部浮动条 |
-| Product shadow | `rgba(0,0,0,0.22) 3px 5px 30px` | 仅用于产品渲染图 |
+侧边栏是门户的核心导航，统一为 `Sidebar/Unified` 组件，按角色实例化：
 
-**阴影原则**：整个系统只有产品渲染图使用阴影；UI 元素通过表面色变化获得层次。
+- **MENU（普通用户可见；管理员也可见）**
+  - 首页（聚合全部系统入口）
+- **ADMIN（管理员额外可见）**
+  - 用户管理
+  - 租户管理
+  - 系统目录
+  - 权限配置
+  - 子系统管理员
+  - 子系统接入
+  - 角色管理
+- **SECURITY（管理员额外可见）**
+  - 安全与审计
 
-## 形状
+**硬规则：** 侧边栏入口只保留上述项，不再新增同级入口。功能收敛到这几个核心分组中。
 
-| Token | Value | Use |
-|---|---|---|
-| `rounded.none` | 0px | 全出血 tile |
-| `rounded.sm` | 8px | 深色工具按钮、内联卡片图像 |
-| `rounded.md` | 11px | 珍珠胶囊按钮 |
-| `rounded.lg` | 18px | 系统入口 utility cards |
-| `rounded.pill` | 9999px | 主 CTA、搜索框、配置器选项 chip |
-| `rounded.full` | 9999px / 50% | 圆形控制按钮、头像 |
+---
 
-## 核心组件
+## 7. 组件规范
 
-### 顶部栏
+### 7.1 按钮
 
-**`top-bar`** — 高度 52px，背景 `canvas-parchment` 或 `canvas`。左侧为当前页面标题（`display-md` 或 `tagline`），右侧为搜索胶囊、租户切换、通知图标、用户头像。
+```
+Primary     bg: var(--text-primary)      color: var(--bg-primary)     /* 反相 */
+Secondary   bg: transparent               color: var(--text-muted)
+            border: 1px solid var(--border-subtle)
+            hover: color→primary, border→text-muted
+Ghost       bg: transparent               color: var(--text-muted)    /* 取消/帮助 */
+            hover: color→primary
+Danger      bg: transparent               color: #e05252
+            border: 1px solid #e05252     hover: bg→#e05252, color→#fff（反相）
+```
 
-### 侧边栏
+**尺寸：** 高度 `34 / 38 / 40`，水平 padding `14–20`，圆角 `8–10`。
+**禁止：** 紫色/蓝色/渐变色填充按钮；`box-shadow` 装饰按钮。
 
-**`sidebar-unified`** — 宽度 260px，高度填满视口，背景 `canvas`（纯白）。顶部品牌区，中部按角色分组导航，底部用户区。
+### 7.2 输入框
 
-- 统一包含 **MENU**、**ADMIN**、**SECURITY** 三个分组。
-- 普通用户实例：隐藏 ADMIN 与 SECURITY 分组，仅显示首页、全部系统、Northline、DocuMind、我的资料、我的权限。
-- 管理员实例：显示完整菜单，额外包含概览、用户管理、租户管理、系统目录、权限配置、角色管理、子系统管理员、子系统接入、安全与审计。
+```
+bg: var(--input-bg)            /* 暗色: rgba(22,22,28,0.5) | 亮色: #FFFFFF */
+border: 1px solid var(--border-subtle)
+border-radius: 8px
+font-size: 13–14px
+padding: 8–10px 12–14px
+focus: border-color → var(--text-muted)  /* 不用色相高亮 */
+```
 
-### 导航项
+**无 label 上浮动画。** Label 用 `12px muted` 放在输入框正上方。
 
-**`nav-item`** — 横向布局，图标 + 标签，`rounded.sm`（8px）圆角，内边距 10px × 12px。
+### 7.3 列表行 vs 卡片
 
-- 默认：透明背景，`ink-muted-80` 图标与文字。
-- 悬停：`canvas-parchment` 背景。
-- 选中：`canvas-parchment` 背景 + `primary` 图标与文字。
+**行式列表**（信息密、可扫描）：
+```
+padding: 12px 0;
+border-bottom: 1px solid var(--border-subtle);
+display: flex; justify-content: space-between;
+```
+用于：设置字段、成员列表、邀请记录、配置项。
 
-### 按钮
+**卡片**（需要视觉分组）：
+```
+padding: 16–20px;
+border: 1px solid var(--border-subtle);
+border-radius: 10–12px;
+background: var(--bg-secondary);
+```
+用于：Stat 卡、模块容器、独立表格。
 
-**`button-primary`** — 背景 `primary`（#0066cc），文字 `canvas`（白色），`rounded.pill`，内边距 11px × 22px，字号 17px / 400。
+**判断规则：** 同一页同层级元素数量 ≥ 4 用行式，< 4 用卡片。
 
-**`button-secondary-pill`** — 透明背景，`primary` 文字 + `primary` 1px 边框，`rounded.pill`。
+### 7.4 Stat 卡片
 
-**`button-dark-utility`** — 背景 `ink`，文字 `body-on-dark`，`rounded.sm`（8px），内边距 8px × 15px。
+```
+┌──────────────────┐
+│ 小标签 (12px muted)      │
+│ 26 (700, 1 line-height)  │
+│ 次级指标 (11px muted)    │
+└──────────────────┘
+```
 
-**`button-pearl-capsule`** — 背景 `surface-pearl`，文字 `ink-muted-80`，3px `divider-soft` 边框，`rounded.md`（11px）。
+- 容器：`padding: 16px 20px; border-radius: 10px; bg-secondary + border-subtle`
+- 网格：`grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px`
+- hover：`translateY(-2px)`，不加阴影
 
-### 卡片
+**门户典型 Stat 指标：** 系统总数、用户数、租户数、活跃会话、审计事件。
 
-**`hero-tile`** — 全出血 tile，背景 `canvas` 或 `canvas-parchment`，内边距 80px。居中堆叠：标题（`hero-display`）→ 副标题（`lead`）→ 双 CTA（`button-primary` + `button-secondary-pill`）→ 产品/系统图示。
+### 7.5 Panel（面板 / 区块）
 
-**`system-card`** — 系统入口卡片。背景 `canvas`，1px `hairline` 边框，`rounded.lg`（18px），内边距 24px。顶部图标区，下方系统名称（`body-strong`）、说明（`body`）、"进入" 链接或按钮。
+```
+container: bg-secondary + border-subtle + radius-md + padding: 16–20
+title:     12px 600 muted uppercase letter-spacing-0.05em
+           margin-bottom: 12
+body:      gap 由内容决定
+```
 
-**`dark-tile`** — 全出血暗色 tile，背景 `surface-tile-1`，文字 `body-on-dark`。用于管理员概览、产品展示或数据面板。
+### 7.6 导航（分组侧栏）
 
-### 输入框
+```
+Section Label (11px 500 muted, letter-spacing: 0.02em)
+  Item Button
+    padding: 8–10px
+    radius: 8
+    active: bg = var(--hover-bg)  + text-primary + weight-500
+    idle:   bg = transparent      + text-muted
+    hover:  bg = var(--hover-bg)
+  Item Button
+(下一分组)
+```
 
-**`search-input`** — 背景 `canvas`，文字 `ink`，1px `rgba(0,0,0,0.08)` 边框，`rounded.pill`，内边距 12px × 20px，高度 44px。左侧搜索图标。
+**硬规则：**
+- 不做折叠/手风琴——层级通过分组标签和缩进表达。
+- 侧栏宽度 `240px`。
 
-### 徽章与状态
+### 7.7 顶栏
 
-**`badge-pill`** — 背景 `canvas-parchment`，文字 `ink-muted-80`，`rounded.pill`，内边距 4px × 12px，字号 `caption`。
+- 高度 `52px`，背景 `bg-primary` 或 `bg-secondary`。
+- 左侧：当前页面标题（`display-md` 或 `tagline`）。
+- 右侧：搜索框、租户切换、通知与头像。
+- 搜索框使用 `bg-secondary + border-subtle + radius-sm`，不再使用胶囊。
 
-**`status-dot`** — 8px 圆点 + 文字说明。成功绿色 `#22C55E`、警告琥珀 `#F59E0B`、错误红色 `#EF4444` 保留作为语义色。
+### 7.8 Badge / 徽标
 
-## Do's and Don'ts
+```
+padding: 2px 8–10px;
+border-radius: 4–6px;
+font-size: 11px;
+font-weight: 500;
 
-### Do
+默认:    bg = hover-bg            color = text-muted
+状态:    bg = 语义色 10%透明度    color = 语义色
+状态点:  6px 圆点 + 语义色
+```
 
-- 使用 `primary`（#0066cc）作为唯一交互色。
-- 标题使用 600 字重 + 负字距。
-- 正文使用 17px / 400 / 1.47。
-- 交替使用 `canvas`、`canvas-parchment`、`surface-tile-1` 创造区块节奏。
-- 将产品/系统图示作为区块核心，UI 元素退后。
-- 仅对产品渲染图使用系统阴影。
+### 7.9 抽屉（Drawer）
 
-### Don't
+```
+position: fixed; top:0 right:0 bottom:0;
+width: 520px (max-width: 90vw);
+background: var(--bg-primary);
+border-left: 1px solid var(--border-subtle);
+z-index: 101;
 
-- 引入第二个强调色。
-- 给卡片、按钮、文字添加阴影。
-- 使用 500 字重。
-- 使用渐变作为装饰背景。
-- 给全出血 tile 加圆角。
-- 在正文使用小于 1.47 的行高。
+header:   padding 14px 20px; border-bottom 1px subtle
+tabs:     padding 8px 20px;  border-bottom 1px subtle（可选）
+body:     flex-1 overflow-auto; padding 20px
+```
 
-## 响应式
+配合 `overlay: rgba(0,0,0,0.4)` 作为背景遮罩。
 
-### 断点
+### 7.10 模态（Modal）
 
-| 名称 | 宽度 | 关键变化 |
-|---|---|---|
-| 手机 | < 640px | 侧边栏收起为汉堡菜单；卡片 1 列；Hero 标题降至 28–34px |
-| 平板 | 640–1023px | 卡片 2 列；侧边栏可折叠 |
-| 桌面 | 1024–1440px | 完整侧边栏；卡片 3 列 |
-| 宽屏 | > 1440px | 内容锁定在 1440px，边距吸收额外宽度 |
+**居中模态（设置类）：**
+```
+宽: 840px, 高: 600px
+背景: var(--modal-bg)           /* 暗: #18181B | 亮: #FFFFFF */
+边框: 1px solid var(--modal-border)
+圆角: 20px
+阴影: 0 25px 50px -12px rgba(0,0,0,0.5)
+遮罩: var(--modal-backdrop) = rgba(0,0,0,0.7)
 
-### 触摸目标
+入场: fadeIn 150ms + scale 0.97→1
+```
 
-- 主按钮最小 44px 高度。
-- 图标按钮 44 × 44px。
-- 导航项整行可点击。
+**全屏接管（管理控制台类）：**
+```
+position: fixed; inset: 0; z-index: 9999;
+background: var(--bg-primary);
+顶部 header 12px 24px + bottom border
+```
 
-## 与现有文档的关系
+---
 
-- 本规范覆盖视觉风格与组件表现。
-- 信息架构、页面职责、交互流程仍以 `docs/ui.md` 为准。
-- 后端 API 与数据模型以 `docs/portal-home/README.md` 等实现文档为准。
+## 8. 交互与动效
+
+### 8.1 过渡时长
+
+```
+--transition-fast:   150ms   /* 按钮色变、悬停 */
+--transition-normal: 200ms   /* 展开/收起、状态切换 */
+--transition-slow:   300ms   /* 抽屉滑入、模态出现 */
+--ease-default:      cubic-bezier(0.4, 0, 0.2, 1)
+```
+
+**硬规则：**
+- 单元素过渡 ≤ 300ms。
+- 大块内容移动（抽屉、模态）用 200–300ms。
+- 不使用 spring / bounce / 回弹。
+- 不使用 framer-motion 的 `whileHover` 做大幅度位移（`translateY(-2px)` 是上限）。
+
+### 8.2 焦点
+
+- 禁用浏览器默认蓝色 outline。
+- focus 态靠 `border-color` 提升到 `--text-muted` 或 `--text-tertiary`。
+- 不叠 `box-shadow` 作为 focus ring。
+
+### 8.3 加载
+
+- Spinner：细圆环，`color: text-muted`，1s 线性旋转。
+- Skeleton：`bg: --skeleton-bg` + shine 动画（1200ms 循环）。
+- 列表加载用 Skeleton，单点操作用 Spinner。
+
+---
+
+## 9. 场景模式
+
+不同场景对设计语言的权重不同，下表给出取舍：
+
+| 场景 | 导航 | 密度 | 卡片/列表 | 示例页面 |
+|---|---|---|---|---|
+| **门户首页** | 侧栏（固定 240px） | 中 | 系统入口卡片 | `/` |
+| **后台管理** | 侧栏（固定 240px） | 高 | 行式 + Stat 卡 | `/admin/*` |
+| **详情抽屉** | 抽屉内 tabs | 中 | 行式 | 用户详情、租户详情、角色详情 |
+| **欢迎/登录** | 无 | 极低 | 单一焦点 | `/login` `/setup` |
+| **设置（快进快出）** | 模态内左栏 | 中 | 行式列表为主 | Settings 模态 |
+
+---
+
+## 10. Do / Don't
+
+### ✅ Do
+
+- 用**反相**表达激活态（白/黑对调），不用色相。
+- 用 `uppercase + letter-spacing` 的小号 muted 标签作为分组/面板标题。
+- 用背景层级差表达分区，边框只做辅助。
+- 邀请状态、配额进度用**语义色 + 细进度条**，不用 emoji。
+- 行式列表 hairline 分隔，卡片收敛到关键容器。
+- Stat 卡片用大号数字（26px/700）+ 小号 muted 标签锚定骨架。
+- 抽屉从右侧滑入，模态从中心淡入，全屏页覆盖画布。
+- 侧边栏入口严格收敛到“MENU / ADMIN / SECURITY”三组，避免入口膨胀。
+
+### ❌ Don't
+
+- **不用紫色/蓝色做按钮或选中态填充背景**。
+- **不用渐变做按钮背景**——主按钮永远是反相单色。
+- **不用 > 1px 的粗描边**，不用 `#ddd` 等带色实线。
+- **不用 emoji 表达语义**——用 lucide icon + 语义色。
+- **不用 box-shadow 做卡片装饰**——卡片靠边框，阴影只给浮层。
+- **不用大号粗体中文标题**作为 panel title——那是 hero 专属。
+- **不用 spring/bounce 过渡**，不用 framer-motion 的大幅位移。
+- **不用数据仪表盘式的多指标堆叠**——只留当前任务所需的 3–6 个指标。
+- **不用圆润/拟物/暖色卡通风格的 UI**。
+
+---
+
+## 11. 品牌例外：Hero / 欢迎页
+
+`/login`、`/setup`、Onboarding 这类首次触达页面允许使用品牌元素，但仅限：
+
+1. **冷白画布**（light）或近黑画布（dark） + **蓝紫粉渐变光球**（`linear-gradient(135deg, #6366F1, #8B5CF6, #EC4899)` + `blur(60px)` + 低透明度）。
+2. **粗体中文 + italic hero 文案**（`font-weight: 700; font-style: italic`），字号 32–56px。
+3. 渐变光球**只出现在 hero 区域背景**，不进入主应用界面。
+4. 主应用（侧栏打开之后）严格遵守本文档其他章节。
+
+> 例外不等于自由。Hero 也只允许**一处**视觉焦点，禁止同时使用大字 + 渐变光球 + 插画 + 多色按钮。
+
+---
+
+## 12. 参考
+
+- **Northline** —— 姐妹项目，本设计系统的直接来源。
+- **DocuMind** —— 姐妹项目，界面结构与设计语言完全对齐。
+- **Corevo**（内部项目）—— 设计语言源头。
+- **Linear** —— 单色激活、密度、uppercase 标签。
+- **Vercel** —— 发丝边框、行式列表、clean stat。
+- **Arc / Rauno Freiberg** —— 微交互克制、无装饰阴影。
